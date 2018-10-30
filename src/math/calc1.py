@@ -38,14 +38,19 @@ class Interpreter(object):
         current_char = text[self.pos]
 
         if current_char.isdigit():
-            token = Token(INTEGER, int(current_char))
+            digits = ""
+            digits += current_char
             self.pos += 1
-            return token
+            if self.pos < len(text):
+                next_char = text[self.pos]
+                if next_char.isdigit():
+                    digits += next_char
+                    self.pos += 1
+            return Token(INTEGER, int(digits))
 
         if current_char == '+':
-            token = Token(PLUS, current_char)
             self.pos += 1
-            return token
+            return Token(PLUS, current_char)
 
         self.error()
 
@@ -60,7 +65,6 @@ class Interpreter(object):
 
         left = self.current_token
         self.eat(INTEGER)
-
 
         op = self.current_token
         self.eat(PLUS)
