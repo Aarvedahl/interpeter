@@ -37,6 +37,13 @@ class Interpreter(object):
 
         current_char = text[self.pos]
 
+        if current_char.isspace():
+            self.pos += 1
+            if self.pos < len(text):
+                current_char = text[self.pos]
+            else:
+                return Token(EOF, None)
+
         if current_char.isdigit():
             digits = ""
             digits += current_char
