@@ -2,7 +2,8 @@
 #
 # EOF (End-of-file) token is used to indicate that
 # there is no more input left on the file
-INTEGER, PLUS, EOF = 'INTEGER', 'PLUS', 'EOF'
+INTEGER, PLUS, MINUS, EOF = 'INTEGER', 'PLUS', 'MINUS', 'EOF'
+OPERATORS = [(MINUS, '-', 'MINUS'), (PLUS, '+', 'PLUS')]
 
 
 class Token(object):
@@ -55,9 +56,10 @@ class Interpreter(object):
                     self.pos += 1
             return Token(INTEGER, int(digits))
 
-        if current_char == '+':
-            self.pos += 1
-            return Token(PLUS, current_char)
+        for operator in OPERATORS:
+            if operator[1] == current_char:
+                self.pos += 1
+                return Token(operator[0], current_char)
 
         self.error()
 
@@ -74,13 +76,15 @@ class Interpreter(object):
         self.eat(INTEGER)
 
         op = self.current_token
-        self.eat(PLUS)
+        self.eat(op.type)
 
         right = self.current_token
         self.eat(INTEGER)
 
-        result = left.value + right.value
-        return result
+        if op.value == '+':
+            return left.value + right.value
+        else:
+            return left.value - right.value
 
 
 def main():
