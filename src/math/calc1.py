@@ -1,24 +1,9 @@
+from token import Token
 # Token Types
 #
 # EOF (End-of-file) token is used to indicate that
 # there is no more input left on the file
 INTEGER, PLUS, MINUS, EOF = 'INTEGER', 'PLUS', 'MINUS', 'EOF'
-OPERATORS = [(MINUS, '-', 'MINUS'), (PLUS, '+', 'PLUS')]
-
-
-class Token(object):
-    def __init__(self, type, value):
-        self.type = type
-        self.value = value
-
-    def __str__(self):
-        return 'Token({type}, {value})'.format(
-            type=self.type,
-            value=repr(self.value)
-        )
-
-    def __repr__(self):
-        return self.__str__()
 
 
 class Interpreter(object):
@@ -26,42 +11,42 @@ class Interpreter(object):
         self.text = text
         self.pos = 0
         self.current_token = None
+        self.current_char = self.text[self.pos]
 
     def error(self):
         raise Exception('Error parsing input')
 
     def get_next_token(self):
-        text = self.text
 
-        if self.pos > len(text) - 1:
-            return Token(EOF, None)
+        while self.current_char is not None:
+            if self.current_char.isspace():
+                self.advance()
 
-        current_char = text[self.pos]
+            if self.current_char.isdigit():
+                return Token(INTEGER, self.parse_integer())
 
-        if current_char.isspace():
-            self.pos += 1
-            if self.pos < len(text):
-                current_char = text[self.pos]
-            else:
-                return Token(EOF, None)
+            if self.current_char == '+':
+                self.advance()
+                return Token(PLUS, '+')
 
-        if current_char.isdigit():
-            digits = ""
-            digits += current_char
-            self.pos += 1
-            if self.pos < len(text):
-                next_char = text[self.pos]
-                if next_char.isdigit():
-                    digits += next_char
-                    self.pos += 1
-            return Token(INTEGER, int(digits))
+            if self.current_char == '-':
+                self.advance()
+                return Token(MINUS, '-')
 
-        for operator in OPERATORS:
-            if operator[1] == current_char:
-                self.pos += 1
-                return Token(operator[0], current_char)
+            self.error()
 
-        self.error()
+        return Token(EOF, None)
+
+    def skip_whitespace(self):
+        while self.current_char is not None and self.current_char.isspace():
+            self.advance()
+
+    def parse_integer(self):
+        result = ''
+        while self.current_char is not None and self.current_char.isdigit():
+            result += self.current_char
+            self.advance()
+        return int(result)
 
     def eat(self, token_type):
         if self.current_token.type == token_type:
@@ -85,6 +70,13 @@ class Interpreter(object):
             return left.value + right.value
         else:
             return left.value - right.value
+
+    def advance(self):
+        self.pos += 1
+        if self.pos < len(self.text):
+            self.current_char = self.text[self.pos]
+        else:
+            self.current_char = None
 
 
 def main():
