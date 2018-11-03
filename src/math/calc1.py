@@ -3,7 +3,7 @@ from token import Token
 #
 # EOF (End-of-file) token is used to indicate that
 # there is no more input left on the file
-INTEGER, PLUS, MINUS, EOF = 'INTEGER', 'PLUS', 'MINUS', 'EOF'
+INTEGER, PLUS, MINUS, MULTIPLY, EOF = 'INTEGER', 'PLUS', 'MINUS', 'MULTIPLY', 'EOF'
 
 
 class Interpreter(object):
@@ -32,6 +32,10 @@ class Interpreter(object):
             if self.current_char == '-':
                 self.advance()
                 return Token(MINUS, '-')
+
+            if self.current_char == '*':
+                self.advance()
+                return Token(MULTIPLY, '*')
 
             self.error()
 
@@ -68,8 +72,10 @@ class Interpreter(object):
 
         if op.value == '+':
             return left.value + right.value
-        else:
+        elif op.value == '-':
             return left.value - right.value
+        elif op.value == '*':
+            return left.value * right.value
 
     def advance(self):
         self.pos += 1
