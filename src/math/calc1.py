@@ -1,9 +1,22 @@
-from token import Token
 # Token Types
 #
 # EOF (End-of-file) token is used to indicate that
 # there is no more input left on the file
 INTEGER, PLUS, MINUS, MULTIPLY, DIVIDE, EOF = 'INTEGER', 'PLUS', 'MINUS', 'MULTIPLY', 'DIVIDE', 'EOF'
+
+class Token(object):
+    def __init__(self, type, value):
+        self.type = type
+        self.value = value
+
+    def __str__(self):
+        return 'Token({type}, {value})'.format(
+            type=self.type,
+            value=repr(self.value)
+        )
+
+    def __repr__(self):
+        return self.__str__()
 
 
 class Interpreter(object):
@@ -56,32 +69,39 @@ class Interpreter(object):
             self.advance()
         return int(result)
 
+
     def eat(self, token_type):
-        if self.current_token.type == token_type:
+        #if self.current_token.type == token_type:
             self.current_token = self.get_next_token()
-        else:
-            self.error()
+
 
     def expr(self):
         self.current_token = self.get_next_token()
 
-        left = self.current_token
+        result = self.get_integer()
+
+        while self.current_token.type in (PLUS, MINUS, MULTIPLY, DIVIDE):
+            token = self.current_token
+            if token.type == PLUS:
+                self.eat(PLUS)
+                result += self.get_integer()
+            elif token.type == MINUS:
+                self.eat(MINUS)
+                result -= self.get_integer()
+            elif token.value == MULTIPLY:
+                self.eat(MULTIPLY)
+                result *= self.get_integer()
+            elif token.value ==DIVIDE:
+                self.eat(DIVIDE)
+                result = result/ self.get_integer()
+
+        return result
+
+    def get_integer(self):
+        token = self.current_token
         self.eat(INTEGER)
+        return token.value
 
-        op = self.current_token
-        self.eat(op.type)
-
-        right = self.current_token
-        self.eat(INTEGER)
-
-        if op.value == '+':
-            return left.value + right.value
-        elif op.value == '-':
-            return left.value - right.value
-        elif op.value == '*':
-            return left.value * right.value
-        elif op.value =='/':
-            return left.value / right.value
 
     def advance(self):
         self.pos += 1
