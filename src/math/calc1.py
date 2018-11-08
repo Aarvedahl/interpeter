@@ -2,7 +2,7 @@
 #
 # EOF (End-of-file) token is used to indicate that
 # there is no more input left on the file
-INTEGER, PLUS, MINUS, EOF = 'INTEGER', 'PLUS', 'MINUS', 'EOF'
+INTEGER, PLUS, MINUS, MULTIPLY, DIVIDE, EOF = 'INTEGER', 'PLUS', 'MINUS', 'MULTIPLY', 'DIVIDE', 'EOF'
 
 
 class Token(object):
@@ -65,6 +65,14 @@ class Interpreter(object):
                 self.advance()
                 return Token(MINUS, '-')
 
+            if self.current_char == '*':
+                self.advance()
+                return Token(MULTIPLY, '*')
+
+            if self.current_char == '/':
+                self.advance()
+                return Token(DIVIDE, '/')
+
             self.error()
 
         return Token(EOF, None)
@@ -84,7 +92,7 @@ class Interpreter(object):
         self.current_token = self.get_next_token()
 
         result = self.get_integer()
-        while self.current_token.type in (PLUS, MINUS):
+        while self.current_token.type in (PLUS, MINUS, MULTIPLY, DIVIDE):
             token = self.current_token
             if token.type == PLUS:
                 self.eat(PLUS)
@@ -92,6 +100,12 @@ class Interpreter(object):
             elif token.type == MINUS:
                 self.eat(MINUS)
                 result -= self.get_integer()
+            elif token.type == MULTIPLY:
+                self.eat(MULTIPLY)
+                result = result * self.get_integer()
+            elif token.type == DIVIDE:
+                self.eat(DIVIDE)
+                result = result / self.get_integer()
 
         return result
 
